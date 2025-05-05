@@ -75,7 +75,7 @@ streamlit run app.py
 
 ## Развёрнутые сервисы
 
--  **FastAPI API**: [https://e1c0-34-87-103-23.ngrok-free.app/predict](https://e1c0-34-87-103-23.ngrok-free.app/predict)
+-  **FastAPI API**: [https://e1c0-34-87-103-23.ngrok-free.app/](https://e1c0-34-87-103-23.ngrok-free.app/)
 -  **Streamlit App**: [https://fast-api-app-cfgmtyobdmrv5mxysdwzdz.streamlit.app/](https://fast-api-app-cfgmtyobdmrv5mxysdwzdz.streamlit.app/)
 
 ---
