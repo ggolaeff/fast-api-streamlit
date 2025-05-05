@@ -5,74 +5,104 @@ import matplotlib.pyplot as plt
 from PIL import Image
 import io
 import cv2
+import time
+from pyngrok import ngrok, conf
 
+# Настройка страницы
 st.set_page_config(page_title="Flower Classifier", layout="wide")
 st.title("Классификатор цветов")
 
-API_URL = "https://e1c0-34-87-103-23.ngrok-free.app/predict"
+if 'ngrok_url' not in st.session_state:
+    try:
+        ngrok.kill()
+        conf.get_default().auth_token = "2wedkprrtp4lebqa1mNPA0o6T51_71JibxY4EQyywFxCuJ4mH"
+        public_url = ngrok.connect(8000).public_url
+        st.session_state.ngrok_url = public_url
+    except:
+        st.session_state.ngrok_url = "https://e1c0-34-87-103-23.ngrok-free.app"
 
-# Список классов
+API_URL = f"{st.session_state.ngrok_url}/predict"
 CLASSES = ['Lilly', 'Lotus', 'Orchid', 'Sunflower', 'Tulip']
 
+# Проверка доступности API
+def check_api():
+    try:
+        response = requests.get(API_URL.replace('/predict', ''), timeout=5)
+        return response.status_code == 200
+    except:
+        return False
+
+# Функции обработки изображений
 def preprocess_image(image):
-    """Предобработка изображения для модели"""
     image = image.resize((150, 150))
     return image
 
 def plot_probabilities(probs):
-    """Визуализация вероятностей"""
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(8, 4))
     y_pos = np.arange(len(CLASSES))
-    ax.barh(y_pos, probs, align='center')
+    ax.barh(y_pos, probs, align='center', color='skyblue')
     ax.set_yticks(y_pos)
     ax.set_yticklabels(CLASSES)
     ax.invert_yaxis()
     ax.set_xlabel('Вероятность')
-    ax.set_title('Распределение вероятностей по классам')
+    ax.set_title('Распределение вероятностей')
     return fig
 
-# Выбор способа загрузки изображения
-option = st.radio("Выберите способ:", ["Загрузить изображение", "Нарисовать цветок"])
+# Интерфейс приложения
+st.sidebar.header("Информация")
+st.sidebar.write(f"API URL: `{API_URL}`")
+st.sidebar.write("Статус:", "Доступен" if check_api() else "Недоступен")
+
+option = st.radio("Выберите способ:", ["Загрузить изображение", "Нарисовать цветок"], horizontal=True)
+
+def process_image(image):
+    try:
+        start_time = time.time()
+        
+        # Конвертация в байты
+        img_byte_arr = io.BytesIO()
+        image.save(img_byte_arr, format='PNG')
+        img_bytes = img_byte_arr.getvalue()
+        
+        # Отправка на API
+        response = requests.post(
+            API_URL,
+            files={"file": ("image.png", img_bytes, "image/png")},
+            timeout=10
+        )
+        
+        if response.status_code == 200:
+            result = response.json()
+            processing_time = time.time() - start_time
+            
+            # Отображение результатов
+            col1, col2 = st.columns(2)
+            with col1:
+                st.metric("Предсказанный класс", result['class'])
+                st.metric("Уверенность", f"{result['confidence']*100:.2f}%")
+                st.metric("Время обработки", f"{processing_time:.2f} сек")
+            
+            with col2:
+                st.pyplot(plot_probabilities(
+                    [result['probabilities'][c] for c in CLASSES]
+                ))
+        else:
+            st.error(f"Ошибка API: {response.text}")
+            
+    except Exception as e:
+        st.error(f"Ошибка обработки: {str(e)}")
 
 if option == "Загрузить изображение":
-    uploaded_file = st.file_uploader("Выберите изображение цветка...", type=["jpg", "jpeg", "png"])
-    
-    if uploaded_file is not None:
+    uploaded_file = st.file_uploader("Выберите изображение цветка", type=["jpg", "jpeg", "png"])
+    if uploaded_file:
         image = Image.open(uploaded_file)
-        st.image(image, caption="Загруженное изображение", use_column_width=True)
-        
-        # Предобработка и отправка на API
-        processed_image = preprocess_image(image)
-        
+        st.image(image, caption="Загруженное изображение", width=300)
         if st.button("Классифицировать"):
-            with st.spinner("Анализируем изображение..."):
-                # Конвертируем изображение в байты
-                img_byte_arr = io.BytesIO()
-                image.save(img_byte_arr, format='PNG')
-                img_byte_arr = img_byte_arr.getvalue()
-                
-                # Отправляем на API
-                response = requests.post(API_URL, files={"file": img_byte_arr})
-                
-            if response.status_code == 200:
-                result = response.json()
-                st.success("Результаты классификации:")
-                
-                col1, col2 = st.columns(2)
-                with col1:
-                    st.metric("Предсказанный класс", result['class'])
-                    st.metric("Уверенность", f"{result['confidence']*100:.2f}%")
-                
-                with col2:
-                    st.pyplot(plot_probabilities([result['probabilities'][c] for c in CLASSES]))
-            else:
-                st.error(f"Ошибка: {response.text}")
+            process_image(image)
 
-else:  # Режим рисования
-    st.write("Нарисуйте цветок на холсте ниже:")
-    
-    # Холст для рисования
-    canvas_result = st.canvas(
+else:
+    st.write("Нарисуйте цветок на холсте:")
+    canvas = st.canvas(
         fill_color="rgba(255, 255, 255, 0.3)",
         stroke_width=10,
         stroke_color="#FFFFFF",
@@ -83,37 +113,11 @@ else:  # Режим рисования
         key="canvas"
     )
     
-    if canvas_result.image_data is not None:
-        # Конвертируем холст в изображение
-        image = Image.fromarray(cv2.cvtColor(canvas_result.image_data, cv2.COLOR_RGBA2RGB))
-        st.image(image, caption="Ваш рисунок", use_column_width=True)
-        
+    if canvas.image_data is not None:
+        image = Image.fromarray(cv2.cvtColor(canvas.image_data, cv2.COLOR_RGBA2RGB))
+        st.image(image, caption="Ваш рисунок", width=300)
         if st.button("Классифицировать рисунок"):
-            with st.spinner("Анализируем рисунок..."):
-                # Предобработка
-                processed_image = preprocess_image(image)
-                
-                # Конвертируем в байты
-                img_byte_arr = io.BytesIO()
-                image.save(img_byte_arr, format='PNG')
-                img_byte_arr = img_byte_arr.getvalue()
-                
-                # Отправляем на API
-                response = requests.post(API_URL, files={"file": img_byte_arr})
-                
-            if response.status_code == 200:
-                result = response.json()
-                st.success("Результаты классификации:")
-                
-                col1, col2 = st.columns(2)
-                with col1:
-                    st.metric("Предсказанный класс", result['class'])
-                    st.metric("Уверенность", f"{result['confidence']*100:.2f}%")
-                
-                with col2:
-                    st.pyplot(plot_probabilities([result['probabilities'][c] for c in CLASSES]))
-            else:
-                st.error(f"Ошибка: {response.text}")
+            process_image(image)
 
 st.markdown("---")
 st.info("Приложение использует CNN-модель для классификации 5 видов цветов")
