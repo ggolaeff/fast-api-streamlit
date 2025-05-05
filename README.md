@@ -9,7 +9,7 @@
 [5 Flower Types Classification Dataset (Kaggle)](https://www.kaggle.com/datasets/kausthubkannan/5-flower-types-classification-dataset)
 
 - **Классы**: Lilly, Lotus, Sunflower, Orchid, Tulip  
-- **Объём**: 1000 изображений (по 1000 на каждый класс)  
+- **Объём**: 1000 изображений  
 - **Формат**: Цветные изображения RGB  
 
 ---
