@@ -108,7 +108,7 @@ else:
     stroke_width = st.slider("Толщина кисти", 1, 25, 10)  # толщина кисти
 
     canvas_result = st_canvas(
-        fill_color="rgba(255, 255, 255, 0.3)",
+        fill_color="rgba(255, 255, 255, 1.0)",  
         stroke_width=stroke_width,
         stroke_color=stroke_color,
         background_color="#FFFFFF",
@@ -119,7 +119,7 @@ else:
     )
     
     if canvas_result.image_data is not None:
-        image = Image.fromarray(canvas_result.image_data.astype('uint8'))
+        image = Image.fromarray(canvas_result.image_data.astype('uint8')).convert("RGB")
         st.image(image, caption="Ваш рисунок", width=300)
         if st.button("Классифицировать рисунок"):
             process_image(image)
