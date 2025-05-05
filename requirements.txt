@@ -6,3 +6,4 @@ numpy==1.26.4
 pillow==10.2.0
 tensorflow==2.16.1
 requests==2.31.0
+matplotlib==3.8.3
