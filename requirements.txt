@@ -8,3 +8,4 @@ tensorflow==2.16.1
 requests==2.31.0
 matplotlib==3.8.3
 opencv-python-headless==4.9.0.80
+pyngrok==7.2.5
