@@ -111,7 +111,7 @@ else:
         fill_color="rgba(255, 255, 255, 0.3)",
         stroke_width=stroke_width,
         stroke_color=stroke_color,
-        background_color="#000000",
+        background_color="#FFFFFF",
         height=400,
         width=400,
         drawing_mode="freedraw",
