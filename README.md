@@ -36,7 +36,7 @@
 
 ---
 
-## 📈 Визуализации результатов
+## Визуализации результатов
 
 ![image](https://github.com/user-attachments/assets/f13e9d10-3fdf-47b5-8e72-9fc116cb91c6)
 ![image](https://github.com/user-attachments/assets/692eece8-61b2-43b9-a992-acd456cd9e65)
