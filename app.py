@@ -9,7 +9,7 @@ import cv2
 st.set_page_config(page_title="Flower Classifier", layout="wide")
 st.title("Классификатор цветов")
 
-API_URL = "https://db32-34-87-103-23.ngrok-free.app/predict"
+API_URL = "https://e1c0-34-87-103-23.ngrok-free.app/predict"
 
 # Список классов
 CLASSES = ['Lilly', 'Lotus', 'Orchid', 'Sunflower', 'Tulip']
