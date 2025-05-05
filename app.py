@@ -103,10 +103,14 @@ if option == "Загрузить изображение":
 
 else:
     st.write("Нарисуйте цветок ниже:")
+
+    stroke_color = st.color_picker("Выберите цвет кисти", "#FFFFFF")  # выбор цвета
+    stroke_width = st.slider("Толщина кисти", 1, 25, 10)  # толщина кисти
+
     canvas_result = st_canvas(
         fill_color="rgba(255, 255, 255, 0.3)",
-        stroke_width=10,
-        stroke_color="#FFFFFF",
+        stroke_width=stroke_width,
+        stroke_color=stroke_color,
         background_color="#000000",
         height=400,
         width=400,
