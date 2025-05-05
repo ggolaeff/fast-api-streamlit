@@ -49,8 +49,8 @@
 1. **Клонируйте репозиторий**
 
 ```bash
-git clone https://github.com/your-username/flower-classification.git
-cd flower-classification
+git clone https://github.com/ggolaeff/fast-api-streamlit.git
+cd fast-api-streamlit
 ```
 
 2. **Установите зависимости**
