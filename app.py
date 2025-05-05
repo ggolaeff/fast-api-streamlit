@@ -1,4 +1,5 @@
 import streamlit as st
+from streamlit_drawable_canvas import st_canvas
 import requests
 import numpy as np
 import matplotlib.pyplot as plt
@@ -101,8 +102,8 @@ if option == "Загрузить изображение":
             process_image(image)
 
 else:
-    st.write("Нарисуйте цветок на холсте:")
-    canvas = st.canvas(
+    st.write("Нарисуйте цветок ниже:")
+    canvas_result = st_canvas(
         fill_color="rgba(255, 255, 255, 0.3)",
         stroke_width=10,
         stroke_color="#FFFFFF",
@@ -113,8 +114,8 @@ else:
         key="canvas"
     )
     
-    if canvas.image_data is not None:
-        image = Image.fromarray(cv2.cvtColor(canvas.image_data, cv2.COLOR_RGBA2RGB))
+    if canvas_result.image_data is not None:
+        image = Image.fromarray(canvas_result.image_data.astype('uint8'))
         st.image(image, caption="Ваш рисунок", width=300)
         if st.button("Классифицировать рисунок"):
             process_image(image)
